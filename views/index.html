@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoSecure &#8212; Web Security Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="mode-beginner">
+
+  <canvas id="bg-canvas"></canvas>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon"><i class="fas fa-shield-halved"></i></div>
+      <div>
+        <span class="logo-text">GoSecure</span>
+        <span class="logo-tagline">Web Security Intelligence</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="mode-toggle" id="modeToggle">
+        <button class="mode-btn active" data-mode="beginner"><i class="fas fa-user"></i> Beginner</button>
+        <button class="mode-btn" data-mode="pro"><i class="fas fa-terminal"></i> Pro</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero beginner-only">
+      <h1>Is your website <span class="gradient-text">actually secure?</span></h1>
+      <p>Enter any URL and get a comprehensive security report in seconds. No technical knowledge required.</p>
+    </div>
+
+    <div class="scanner-card">
+      <div class="tabs" id="tabs">
+        <button class="tab-btn active" data-tab="fullscan">
+          <i class="fas fa-bolt tab-icon-bolt"></i>
+          <span class="tab-label">Full Audit</span>
+          <span class="tab-badge beginner-only">Recommended</span>
+        </button>
+        <button class="tab-btn" data-tab="dns">
+          <i class="fas fa-globe"></i>
+          <span class="tab-label">DNS</span>
+        </button>
+        <button class="tab-btn" data-tab="security">
+          <i class="fas fa-lock"></i>
+          <span class="tab-label">HTTP Security</span>
+        </button>
+        <button class="tab-btn" data-tab="tech">
+          <i class="fas fa-microchip"></i>
+          <span class="tab-label">Tech Stack</span>
+        </button>
+        <button class="tab-btn" data-tab="email">
+          <i class="fas fa-envelope-open-text"></i>
+          <span class="tab-label">Email</span>
+        </button>
+      </div>
+
+      <form id="functionalityForm">
+
+        <!-- Full Scan -->
+        <div class="tab-content active" id="tab-fullscan">
+          <div class="full-scan-hero">
+            <div class="scan-icon-box"><i class="fas fa-shield-virus"></i></div>
+            <div>
+              <h3>Full Audit <span class="tab-subtitle">&#8212; automated A&#8211;F grade</span></h3>
+              <p class="beginner-only text-muted">Automatically runs all checks across <em>every</em> category &#8212; DNS, security, tech stack, performance &amp; email &#8212; and gives your site a single grade from A to F. Free for everyone, no choices needed &#8212; just scan.</p>
+              <p class="pro-only text-muted small-mono">44+ parallel checks &middot; weighted A&#8211;F scoring (security) &middot; full info coverage (DNS, ports, SSL chain, tech, WAF, ciphers, geo, archive, carbon, threat intel, ranking, BIMI, PWA) &middot; click rows to expand</p>
+            </div>
+          </div>
+          <div class="check-pills">
+            <span class="pill"><i class="fas fa-circle-check"></i> Security Headers</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> TLS/SSL</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> CSP Policy</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> CORS</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Cookies</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Clickjacking</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> HSTS</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Mixed Content</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> SRI Integrity</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Open Redirect</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Outdated Software</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Email Security</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> JS Libraries</span>
+            <span class="pill"><i class="fas fa-circle-check"></i> Redirect Chain</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> WHOIS</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> DNS Records</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> DNSSEC</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> DNS Server Info</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Subdomains</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Open Ports</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Server Status</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> SSL Certificate</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Tech Stack</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Response Headers</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Sitemap</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Robots.txt</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> HTTP/2 &amp; HTTP/3</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> security.txt</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> WAF/CDN</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> CAA Records</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> IP Geolocation</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Archive History</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Carbon Footprint</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> HTTP Methods</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Cipher Suites</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Social Tags</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Linked Pages</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> DNS Blocks</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Site Features (PWA)</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Malware &amp; Phishing</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> Global Ranking</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> SSL Cert Chain</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> CT Subdomains</span>
+            <span class="pill"><i class="fas fa-circle-dot"></i> BIMI</span>
+          </div>
+          <input type="radio" name="functionality" value="fullScan" id="r-fullScan" style="display:none" checked>
+        </div>
+
+        <!-- DNS -->
+        <div class="tab-content" id="tab-dns">
+          <div class="tab-section-desc">
+            <span class="beginner-only"><i class="fas fa-hand-pointer" style="margin-right:6px;color:var(--text-muted)"></i>Look up DNS and domain information. Select one or more checks and scan.</span>
+            <span class="pro-only small-mono text-muted">DNS checks &#8212; WHOIS, A/AAAA/MX records, DNSSEC, nameservers, subdomain enumeration</span>
+          </div>
+          <div class="check-select-bar">
+            <button type="button" class="sel-btn" onclick="selectAll(this)"><i class="fas fa-check-double"></i> Select All</button>
+            <button type="button" class="sel-btn sel-none" onclick="selectNone(this)"><i class="fas fa-xmark"></i> None</button>
+            <span class="sel-count">0 selected</span>
+          </div>
+          <div class="checks-grid">
+            <label class="check-card"><input type="checkbox" name="functionality" value="whois">
+              <div class="check-card-inner"><i class="fas fa-id-card check-icon"></i><div class="check-info">
+                <span class="check-name">WHOIS</span>
+                <span class="check-desc beginner-only">Who owns this domain? When does it expire?</span>
+                <span class="check-desc pro-only small-mono text-muted">Registrar &middot; dates &middot; contacts</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="dnsLookup">
+              <div class="check-card-inner"><i class="fas fa-map-pin check-icon"></i><div class="check-info">
+                <span class="check-name">DNS Lookup</span>
+                <span class="check-desc beginner-only">Find the IP addresses linked to this domain</span>
+                <span class="check-desc pro-only small-mono text-muted">A &middot; AAAA &middot; MX &middot; NS &middot; TXT &middot; CNAME</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="dnssec">
+              <div class="check-card-inner"><i class="fas fa-key check-icon"></i><div class="check-info">
+                <span class="check-name">DNSSEC</span>
+                <span class="check-desc beginner-only">Is the domain protected against fake DNS responses?</span>
+                <span class="check-desc pro-only small-mono text-muted">DNSKEY &middot; DS &middot; RRSIG &middot; NSEC</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="dns">
+              <div class="check-card-inner"><i class="fas fa-server check-icon"></i><div class="check-info">
+                <span class="check-name">DNS Server Info</span>
+                <span class="check-desc beginner-only">Which servers handle traffic for this domain?</span>
+                <span class="check-desc pro-only small-mono text-muted">Authoritative NS &middot; resolver chain</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="subdomainEnum">
+              <div class="check-card-inner"><i class="fas fa-sitemap check-icon"></i><div class="check-info">
+                <span class="check-name">Subdomain Enum</span>
+                <span class="check-desc beginner-only">Discover hidden parts of the website that may be exposed</span>
+                <span class="check-desc pro-only small-mono text-muted">68-wordlist DNS brute-force &middot; live host detection</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="caaRecords">
+              <div class="check-card-inner"><i class="fas fa-stamp check-icon"></i><div class="check-info">
+                <span class="check-name">CAA Records</span>
+                <span class="check-desc beginner-only">Which authorities are allowed to issue SSL certificates for this domain?</span>
+                <span class="check-desc pro-only small-mono text-muted">issue &middot; issuewild &middot; iodef DNS records (RFC 8659)</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="dnsBlocks">
+              <div class="check-card-inner"><i class="fas fa-ban check-icon"></i><div class="check-info">
+                <span class="check-name">DNS Block Check</span>
+                <span class="check-desc beginner-only">Is this site being blocked by family-safe / security DNS providers?</span>
+                <span class="check-desc pro-only small-mono text-muted">Quad9 &middot; Cloudflare Family &middot; OpenDNS &middot; CleanBrowsing &middot; AdGuard</span>
+              </div></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- HTTP Security -->
+        <div class="tab-content" id="tab-security">
+          <div class="tab-section-desc">
+            <span class="beginner-only"><i class="fas fa-hand-pointer" style="margin-right:6px;color:var(--text-muted)"></i>Pick the specific HTTP security checks you want to run. Results appear side by side.</span>
+            <span class="pro-only small-mono text-muted">Individual HTTP-layer checks &#8212; headers, cookies, CSP, CORS, clickjacking, redirects, SRI &#8212; select any combination</span>
+          </div>
+          <div class="check-select-bar">
+            <button type="button" class="sel-btn" onclick="selectAll(this)"><i class="fas fa-check-double"></i> Select All</button>
+            <button type="button" class="sel-btn sel-none" onclick="selectNone(this)"><i class="fas fa-xmark"></i> None</button>
+            <span class="sel-count">0 selected</span>
+          </div>
+          <div class="checks-grid">
+            <label class="check-card"><input type="checkbox" name="functionality" value="securityHeaders">
+              <div class="check-card-inner"><i class="fas fa-shield-halved check-icon"></i><div class="check-info">
+                <span class="check-name">Security Headers</span>
+                <span class="check-desc beginner-only">Does the site tell browsers to protect users?</span>
+                <span class="check-desc pro-only small-mono text-muted">CSP &middot; X-Frame &middot; HSTS &middot; Referrer-Policy &middot; Permissions-Policy</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="cookieAudit">
+              <div class="check-card-inner"><i class="fas fa-cookie-bite check-icon"></i><div class="check-info">
+                <span class="check-name">Cookie Audit</span>
+                <span class="check-desc beginner-only">Are login cookies protected from theft?</span>
+                <span class="check-desc pro-only small-mono text-muted">Secure &middot; HttpOnly &middot; SameSite flag analysis</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="hstsChecker">
+              <div class="check-card-inner"><i class="fas fa-lock check-icon"></i><div class="check-info">
+                <span class="check-name">HSTS Checker</span>
+                <span class="check-desc beginner-only">Does the site force secure HTTPS connections?</span>
+                <span class="check-desc pro-only small-mono text-muted">max-age &middot; includeSubDomains &middot; preload</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="cspAnalysis">
+              <div class="check-card-inner"><i class="fas fa-file-shield check-icon"></i><div class="check-info">
+                <span class="check-name">CSP Analysis</span>
+                <span class="check-desc beginner-only">Can attackers inject malicious scripts into the page?</span>
+                <span class="check-desc pro-only small-mono text-muted">Directive parse &middot; unsafe-inline &middot; unsafe-eval &middot; wildcards</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="clickjacking">
+              <div class="check-card-inner"><i class="fas fa-display check-icon"></i><div class="check-info">
+                <span class="check-name">Clickjacking</span>
+                <span class="check-desc beginner-only">Can attackers trick users by hiding the site in a frame?</span>
+                <span class="check-desc pro-only small-mono text-muted">X-Frame-Options &middot; frame-ancestors CSP</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="corsCheck">
+              <div class="check-card-inner"><i class="fas fa-right-left check-icon"></i><div class="check-info">
+                <span class="check-name">CORS Check</span>
+                <span class="check-desc beginner-only">Can other websites make requests as your users?</span>
+                <span class="check-desc pro-only small-mono text-muted">Access-Control-Allow-Origin &middot; credentials &middot; null origin</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="redirectChain">
+              <div class="check-card-inner"><i class="fas fa-route check-icon"></i><div class="check-info">
+                <span class="check-name">Redirect Chain</span>
+                <span class="check-desc beginner-only">Does the site redirect through insecure connections?</span>
+                <span class="check-desc pro-only small-mono text-muted">Hop trace &middot; HTTP downgrade &middot; loop detection</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="mixedContent">
+              <div class="check-card-inner"><i class="fas fa-circle-half-stroke check-icon"></i><div class="check-info">
+                <span class="check-name">Mixed Content</span>
+                <span class="check-desc beginner-only">Is the site accidentally loading insecure resources?</span>
+                <span class="check-desc pro-only small-mono text-muted">Active vs passive &middot; HTTP on HTTPS pages</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="sriCheck">
+              <div class="check-card-inner"><i class="fas fa-fingerprint check-icon"></i><div class="check-info">
+                <span class="check-name">SRI Audit</span>
+                <span class="check-desc beginner-only">Are external scripts verified against tampering?</span>
+                <span class="check-desc pro-only small-mono text-muted">Subresource Integrity &middot; integrity attr &middot; crossorigin</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="openRedirect">
+              <div class="check-card-inner"><i class="fas fa-arrow-up-right-from-square check-icon"></i><div class="check-info">
+                <span class="check-name">Open Redirect</span>
+                <span class="check-desc beginner-only">Can attackers redirect users to malicious websites?</span>
+                <span class="check-desc pro-only small-mono text-muted">15 redirect params &middot; canary URL &middot; location header</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="securityTxt">
+              <div class="check-card-inner"><i class="fas fa-file-lines check-icon"></i><div class="check-info">
+                <span class="check-name">security.txt</span>
+                <span class="check-desc beginner-only">Does the site publish a way to report security issues?</span>
+                <span class="check-desc pro-only small-mono text-muted">RFC 9116 &middot; /.well-known/security.txt &middot; disclosure contact</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="wafDetect">
+              <div class="check-card-inner"><i class="fas fa-shield check-icon"></i><div class="check-info">
+                <span class="check-name">WAF / CDN Detection</span>
+                <span class="check-desc beginner-only">Is the site behind a security firewall or CDN?</span>
+                <span class="check-desc pro-only small-mono text-muted">Cloudflare &middot; Akamai &middot; AWS WAF &middot; Sucuri &middot; Imperva &middot; Fastly &middot; 16 sigs</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="httpMethods">
+              <div class="check-card-inner"><i class="fas fa-code-branch check-icon"></i><div class="check-info">
+                <span class="check-name">HTTP Methods</span>
+                <span class="check-desc beginner-only">Are dangerous request methods like DELETE or PUT exposed?</span>
+                <span class="check-desc pro-only small-mono text-muted">OPTIONS probe &middot; PUT &middot; DELETE &middot; TRACE &middot; CONNECT enumeration</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="malwareCheck">
+              <div class="check-card-inner"><i class="fas fa-bug check-icon"></i><div class="check-info">
+                <span class="check-name">Malware &amp; Phishing</span>
+                <span class="check-desc beginner-only">Is this site flagged as dangerous by threat databases?</span>
+                <span class="check-desc pro-only small-mono text-muted">URLhaus host + URL lookup &middot; abuse.ch threat feed</span>
+              </div></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="tab-content" id="tab-tech">
+          <div class="tab-section-desc">
+            <span class="beginner-only"><i class="fas fa-hand-pointer" style="margin-right:6px;color:var(--text-muted)"></i>Discover what software and services power this site, and check for known vulnerabilities.</span>
+            <span class="pro-only small-mono text-muted">Tech fingerprinting &#8212; server, ports, TLS, CMS, outdated libs, JS CVEs, sitemap, robots.txt</span>
+          </div>
+          <div class="check-select-bar">
+            <button type="button" class="sel-btn" onclick="selectAll(this)"><i class="fas fa-check-double"></i> Select All</button>
+            <button type="button" class="sel-btn sel-none" onclick="selectNone(this)"><i class="fas fa-xmark"></i> None</button>
+            <span class="sel-count">0 selected</span>
+          </div>
+          <div class="checks-grid">
+            <label class="check-card"><input type="checkbox" name="functionality" value="getData">
+              <div class="check-card-inner"><i class="fas fa-code check-icon"></i><div class="check-info">
+                <span class="check-name">Header Info</span>
+                <span class="check-desc beginner-only">What server software is this site running?</span>
+                <span class="check-desc pro-only small-mono text-muted">Full response headers &middot; server banner</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="portScanner">
+              <div class="check-card-inner"><i class="fas fa-network-wired check-icon"></i><div class="check-info">
+                <span class="check-name">Port Scanner</span>
+                <span class="check-desc beginner-only">Which network ports are open on this server?</span>
+                <span class="check-desc pro-only small-mono text-muted">Common TCP ports &middot; service identification</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="servstat">
+              <div class="check-card-inner"><i class="fas fa-heart-pulse check-icon"></i><div class="check-info">
+                <span class="check-name">Server Status</span>
+                <span class="check-desc beginner-only">Is the server online and how fast is it responding?</span>
+                <span class="check-desc pro-only small-mono text-muted">HTTP status &middot; response time &middot; availability</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="SSLInfo">
+              <div class="check-card-inner"><i class="fas fa-certificate check-icon"></i><div class="check-info">
+                <span class="check-name">SSL Certificate</span>
+                <span class="check-desc beginner-only">Is the site's security certificate valid and trusted?</span>
+                <span class="check-desc pro-only small-mono text-muted">Cert chain &middot; expiry &middot; SANs &middot; issuer &middot; key info</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="tlsAnalysis">
+              <div class="check-card-inner"><i class="fas fa-lock-open check-icon"></i><div class="check-info">
+                <span class="check-name">TLS Analysis</span>
+                <span class="check-desc beginner-only">Is the site using strong modern encryption?</span>
+                <span class="check-desc pro-only small-mono text-muted">TLS version &middot; cipher suite &middot; key bits &middot; legacy protocol</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="techDetect">
+              <div class="check-card-inner"><i class="fas fa-magnifying-glass-chart check-icon"></i><div class="check-info">
+                <span class="check-name">CMS Detection</span>
+                <span class="check-desc beginner-only">What platform is powering this website?</span>
+                <span class="check-desc pro-only small-mono text-muted">22-sig fingerprint &middot; headers &middot; cookies &middot; body</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="outdatedCheck">
+              <div class="check-card-inner"><i class="fas fa-triangle-exclamation check-icon"></i><div class="check-info">
+                <span class="check-name">Outdated Software</span>
+                <span class="check-desc beginner-only">Is the site running software with known security holes?</span>
+                <span class="check-desc pro-only small-mono text-muted">CVE DB &middot; EOL versions &middot; Apache &middot; nginx &middot; PHP &middot; IIS</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="jsAudit">
+              <div class="check-card-inner"><i class="fas fa-js check-icon"></i><div class="check-info">
+                <span class="check-name">JS Library Audit</span>
+                <span class="check-desc beginner-only">Are any JavaScript tools on the site known to be vulnerable?</span>
+                <span class="check-desc pro-only small-mono text-muted">jQuery &middot; Bootstrap &middot; Angular &middot; React &middot; Vue &middot; CVEs</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="sitemap">
+              <div class="check-card-inner"><i class="fas fa-map check-icon"></i><div class="check-info">
+                <span class="check-name">Sitemap</span>
+                <span class="check-desc beginner-only">What pages has this site made publicly visible?</span>
+                <span class="check-desc pro-only small-mono text-muted">sitemap.xml parse &middot; URL enumeration</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="crawlcheck">
+              <div class="check-card-inner"><i class="fas fa-robot check-icon"></i><div class="check-info">
+                <span class="check-name">Crawl Rules</span>
+                <span class="check-desc beginner-only">What is this site trying to hide from search engines?</span>
+                <span class="check-desc pro-only small-mono text-muted">robots.txt &middot; Disallow paths &middot; crawl restrictions</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="httpProtocols">
+              <div class="check-card-inner"><i class="fas fa-bolt-lightning check-icon"></i><div class="check-info">
+                <span class="check-name">HTTP/2 &amp; HTTP/3</span>
+                <span class="check-desc beginner-only">Does the site use modern fast protocols?</span>
+                <span class="check-desc pro-only small-mono text-muted">ALPN h2 negotiation &middot; Alt-Svc h3 / QUIC</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="cipherSuites">
+              <div class="check-card-inner"><i class="fas fa-shuffle check-icon"></i><div class="check-info">
+                <span class="check-name">Cipher Suites</span>
+                <span class="check-desc beginner-only">Which encryption algorithms does this server accept?</span>
+                <span class="check-desc pro-only small-mono text-muted">TLS 1.3 &middot; ECDHE &middot; AES-GCM &middot; ChaCha20 &middot; weak cipher probe</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="ipGeo">
+              <div class="check-card-inner"><i class="fas fa-globe check-icon"></i><div class="check-info">
+                <span class="check-name">IP Geolocation</span>
+                <span class="check-desc beginner-only">Where in the world is this site hosted?</span>
+                <span class="check-desc pro-only small-mono text-muted">Country &middot; city &middot; ASN &middot; ISP &middot; reverse DNS (ip-api.com)</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="archiveHistory">
+              <div class="check-card-inner"><i class="fas fa-clock-rotate-left check-icon"></i><div class="check-info">
+                <span class="check-name">Archive History</span>
+                <span class="check-desc beginner-only">When was this site first seen on the internet?</span>
+                <span class="check-desc pro-only small-mono text-muted">Wayback Machine &middot; first &amp; last snapshot &middot; approx count</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="carbon">
+              <div class="check-card-inner"><i class="fas fa-leaf check-icon"></i><div class="check-info">
+                <span class="check-name">Carbon Footprint</span>
+                <span class="check-desc beginner-only">How eco-friendly is loading this website?</span>
+                <span class="check-desc pro-only small-mono text-muted">CO₂ per visit &middot; green hosting &middot; via websitecarbon.com</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="socialTags">
+              <div class="check-card-inner"><i class="fas fa-share-nodes check-icon"></i><div class="check-info">
+                <span class="check-name">Social Tags</span>
+                <span class="check-desc beginner-only">How does the site look when shared on social media?</span>
+                <span class="check-desc pro-only small-mono text-muted">OpenGraph &middot; Twitter Cards &middot; meta description &middot; readiness score</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="linkedPages">
+              <div class="check-card-inner"><i class="fas fa-link check-icon"></i><div class="check-info">
+                <span class="check-name">Linked Pages</span>
+                <span class="check-desc beginner-only">What other pages and websites does this site link to?</span>
+                <span class="check-desc pro-only small-mono text-muted">Internal/external split &middot; external host frequency &middot; mailto / tel</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="siteFeatures">
+              <div class="check-card-inner"><i class="fas fa-mobile-screen-button check-icon"></i><div class="check-info">
+                <span class="check-name">Site Features</span>
+                <span class="check-desc beginner-only">Does the site use modern web features (PWA, mobile-friendly, etc.)?</span>
+                <span class="check-desc pro-only small-mono text-muted">PWA manifest &middot; service worker &middot; viewport &middot; OG &middot; JSON-LD &middot; 20 signals</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="globalRanking">
+              <div class="check-card-inner"><i class="fas fa-ranking-star check-icon"></i><div class="check-info">
+                <span class="check-name">Global Ranking</span>
+                <span class="check-desc beginner-only">How popular is this site globally?</span>
+                <span class="check-desc pro-only small-mono text-muted">Tranco top-1M rank &middot; historical positions (research-grade aggregation)</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="sslChain">
+              <div class="check-card-inner"><i class="fas fa-link-slash check-icon"></i><div class="check-info">
+                <span class="check-name">SSL Certificate Chain</span>
+                <span class="check-desc beginner-only">Who vouches for this site’s identity, all the way up?</span>
+                <span class="check-desc pro-only small-mono text-muted">Full leaf → intermediate → root chain (openssl s_client -showcerts)</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="ctSubdomains">
+              <div class="check-card-inner"><i class="fas fa-magnifying-glass check-icon"></i><div class="check-info">
+                <span class="check-name">CT Log Subdomains</span>
+                <span class="check-desc beginner-only">What other hostnames has this domain ever had certificates for?</span>
+                <span class="check-desc pro-only small-mono text-muted">crt.sh Certificate Transparency log mining &middot; passive recon</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="sslLabs">
+              <div class="check-card-inner"><i class="fas fa-flask check-icon"></i><div class="check-info">
+                <span class="check-name">SSL Labs Deep Audit <span style="color:#ffaa44;font-size:10px">SLOW</span></span>
+                <span class="check-desc beginner-only">Get the famous A–F SSL Labs grade (this one takes ~1-2 minutes).</span>
+                <span class="check-desc pro-only small-mono text-muted">Qualys SSL Labs v3 API &middot; Heartbleed &middot; POODLE &middot; FREAK &middot; LOGJAM &middot; DROWN &middot; ROBOT</span>
+              </div></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="tab-content" id="tab-email">
+          <div class="tab-section-desc">
+            <span class="beginner-only"><i class="fas fa-hand-pointer" style="margin-right:6px;color:var(--text-muted)"></i>Check whether attackers can send fake emails pretending to be from this domain.</span>
+            <span class="pro-only small-mono text-muted">Email anti-spoofing records &#8212; SPF, DKIM selectors, DMARC policy</span>
+          </div>
+          <div class="check-select-bar">
+            <button type="button" class="sel-btn" onclick="selectAll(this)"><i class="fas fa-check-double"></i> Select All</button>
+            <button type="button" class="sel-btn sel-none" onclick="selectNone(this)"><i class="fas fa-xmark"></i> None</button>
+            <span class="sel-count">0 selected</span>
+          </div>
+          <div class="checks-grid single-wide">
+            <label class="check-card"><input type="checkbox" name="functionality" value="emailSecurity">
+              <div class="check-card-inner"><i class="fas fa-envelope-circle-check check-icon"></i><div class="check-info">
+                <span class="check-name">Email Security (SPF / DKIM / DMARC)</span>
+                <span class="check-desc beginner-only">Can attackers send fake emails pretending to be this domain?</span>
+                <span class="check-desc pro-only small-mono text-muted">SPF &middot; DKIM selectors &middot; DMARC policy strength</span>
+              </div></div>
+            </label>
+            <label class="check-card"><input type="checkbox" name="functionality" value="bimi">
+              <div class="check-card-inner"><i class="fas fa-envelope-open-text check-icon"></i><div class="check-info">
+                <span class="check-name">BIMI Record</span>
+                <span class="check-desc beginner-only">Does this domain show its logo in customers’ email inboxes?</span>
+                <span class="check-desc pro-only small-mono text-muted">default._bimi TXT &middot; v=BIMI1 &middot; logo URL &middot; VMC certificate</span>
+              </div></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Input bar -->
+        <div class="input-area">
+          <div class="input-wrapper">
+            <i class="fas fa-globe input-prefix-icon"></i>
+            <input type="text" id="inputField" name="inputField"
+                   placeholder="Enter domain or URL  e.g.  github.com"
+                   autocomplete="off" spellcheck="false" required>
+            <button type="submit" id="scanBtn">
+              <span class="btn-text"><i class="fas fa-bolt"></i> Scan</span>
+              <span class="btn-loading" style="display:none"><i class="fas fa-spinner fa-spin"></i> Scanning</span>
+            </button>
+          </div>
+          <p class="input-hint beginner-only">Just type the website address &#8212; no need for https:// or www</p>
+        </div>
+
+      </form>
+    </div><!-- /scanner-card -->
+
+    <div id="responseContainer" style="display:none"></div>
+  </main>
+
+  <footer>GoSecure &copy; 2026 &mdash; Web Security Intelligence Platform</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
