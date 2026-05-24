@@ -1,6 +1,3 @@
-# This module defines a Workers API for Python. It is similar to the API provided by
-# JS Workers, but with changes and additions to be more idiomatic to the Python
-# programming language.
 import datetime
 import functools
 import inspect

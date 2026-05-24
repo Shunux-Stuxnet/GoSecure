@@ -1,7 +1,3 @@
-"""
-Top level entropy patches for packages
-"""
-
 import sys
 from contextlib import contextmanager
 

@@ -1,9 +1,3 @@
-/* ================================================================
-   GoSecure -- styles.css
-   Dark-glass futuristic UI -- beginner/pro dual-mode
-   ================================================================ */
-
-/* -- Reset & base ------------------------------------------------ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -44,7 +38,6 @@ body {
   overflow-x: hidden;
 }
 
-/* -- Background canvas ------------------------------------------ */
 #bg-canvas {
   position: fixed;
   inset: 0;
@@ -54,7 +47,6 @@ body {
   pointer-events: none;
 }
 
-/* -- Header ----------------------------------------------------- */
 header {
   position: relative;
   z-index: 10;
@@ -104,7 +96,6 @@ header {
   text-transform: uppercase;
 }
 
-/* -- Mode toggle ------------------------------------------------ */
 .mode-toggle {
   display: flex;
   background: rgba(255,255,255,0.03);
@@ -133,13 +124,11 @@ header {
   color: var(--green);
 }
 
-/* -- Mode visibility --------------------------------------------- */
 body.mode-beginner .pro-only  { display: none !important; }
 body.mode-pro      .beginner-only { display: none !important; }
 body.mode-pro      .tab-badge { display: none !important; }
 .pro-only { display: none; } /* default = beginner */
 
-/* -- Main layout ------------------------------------------------- */
 main {
   position: relative;
   z-index: 5;
@@ -148,7 +137,6 @@ main {
   padding: 40px 22px 80px;
 }
 
-/* -- Hero ------------------------------------------------------- */
 .hero {
   text-align: center;
   margin-bottom: 36px;
@@ -176,7 +164,6 @@ main {
   margin: 0 auto;
 }
 
-/* -- Scanner card ----------------------------------------------- */
 .scanner-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -188,7 +175,6 @@ main {
               inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
-/* -- Tabs ------------------------------------------------------- */
 .tabs {
   display: flex;
   background: rgba(0,0,0,0.25);
@@ -237,11 +223,9 @@ main {
   text-transform: uppercase;
 }
 
-/* -- Tab content ------------------------------------------------ */
 .tab-content { display: none; padding: 22px; }
 .tab-content.active { display: block; }
 
-/* -- Full scan hero --------------------------------------------- */
 .full-scan-hero {
   display: flex;
   align-items: flex-start;
@@ -285,7 +269,6 @@ main {
   font-family: var(--font-mono);
 }
 
-/* -- Check cards grid ------------------------------------------- */
 .checks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -337,7 +320,6 @@ main {
 .check-name { font-size: 13px; font-weight: 600; color: var(--text); }
 .check-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
 
-/* -- Input area ------------------------------------------------- */
 .input-area {
   padding: 18px 22px 22px;
   border-top: 1px solid var(--border);
@@ -413,7 +395,6 @@ main {
   opacity: 0.65;
 }
 
-/* -- Utility classes --------------------------------------------- */
 .text-muted  { color: var(--text-muted) !important; }
 .text-green  { color: var(--green); }
 .text-red    { color: var(--red); }
@@ -421,7 +402,6 @@ main {
 .text-blue   { color: var(--blue); }
 .small-mono  { font-size: 12px; font-family: var(--font-mono); }
 
-/* -- Results container ------------------------------------------ */
 #responseContainer {
   margin-top: 26px;
   animation: fadeUp 0.35s ease;
@@ -432,7 +412,6 @@ main {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* -- Scanning state --------------------------------------------- */
 .scanning-status {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -474,7 +453,6 @@ main {
   75% { content: '...'; }
 }
 
-/* -- Full scan report card -------------------------------------- */
 .report-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -654,7 +632,6 @@ main {
   word-break: break-all;
 }
 
-/* -- Generic data display --------------------------------------- */
 .data-display {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -716,7 +693,6 @@ main {
 }
 .raw-json.visible { display: block; }
 
-/* -- Error display ----------------------------------------------- */
 .error-card {
   background: rgba(255,59,92,0.07);
   border: 1px solid rgba(255,59,92,0.3);
@@ -729,7 +705,6 @@ main {
   gap: 10px;
 }
 
-/* -- Footer ------------------------------------------------------ */
 footer {
   position: relative;
   z-index: 5;
@@ -740,13 +715,11 @@ footer {
   border-top: 1px solid var(--border);
 }
 
-/* -- Scrollbar --------------------------------------------------- */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,255,156,0.2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,255,156,0.4); }
 
-/* -- Responsive -------------------------------------------------- */
 @media (max-width: 640px) {
   header { padding: 12px 16px; }
   .logo-tagline { display: none; }
@@ -763,8 +736,6 @@ footer {
   .tab-btn { padding: 12px 16px; }
 }
 
-
-/* -- Check select bar ------------------------------------------- */
 .check-select-bar {
   display: flex;
   align-items: center;
@@ -852,7 +823,6 @@ footer {
   opacity: 0.8;
 }
 
-/* -- Multi-result display --------------------------------------- */
 .multi-results {
   display: flex;
   flex-direction: column;
@@ -943,7 +913,6 @@ footer {
   padding: 10px 0;
 }
 
-/* -- Scan button count badge ------------------------------------ */
 .btn-count {
   background: rgba(5,10,20,0.4);
   border-radius: 12px;
@@ -953,7 +922,6 @@ footer {
   margin-left: 2px;
 }
 
-/* -- Tab section description ------------------------------------ */
 .tab-section-desc {
   margin-bottom: 14px;
   padding: 10px 14px;

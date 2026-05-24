@@ -1,9 +1,3 @@
-"""
-GoSecure — Full FastAPI application.
-
-Deployed on Render as the complete backend. Cloudflare Workers acts as
-a CDN + proxy edge layer that forwards all API requests here.
-"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

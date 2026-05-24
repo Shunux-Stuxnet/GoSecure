@@ -1,10 +1,3 @@
-/* ================================================================
-   GoSecure -- script.js
-   Animated bg, dual-mode, security scan report card,
-   multi-select parallel checks, rich data display
-   ================================================================ */
-
-/* -- Animated background (particle network) --------------------- */
 (function initBg() {
   var canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
@@ -51,7 +44,6 @@
   window.addEventListener('resize', function() { resize(); make(); });
 })();
 
-/* -- Mode toggle ------------------------------------------------- */
 document.querySelectorAll('.mode-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -61,7 +53,6 @@ document.querySelectorAll('.mode-btn').forEach(function(btn) {
   });
 });
 
-/* -- Tab switching ----------------------------------------------- */
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -73,7 +64,6 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
   });
 });
 
-/* -- Checkbox change listeners ----------------------------------- */
 document.addEventListener('change', function(e) {
   if (e.target && e.target.type === 'checkbox' && e.target.name === 'functionality') {
     var tab = e.target.closest('.tab-content');
@@ -111,7 +101,6 @@ function refreshBtnLabel() {
   }
 }
 
-/* -- Select All / None helpers (called from HTML) ---------------- */
 function selectAll(btn) {
   var tab = btn.closest('.tab-content');
   tab.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
@@ -125,7 +114,6 @@ function selectNone(btn) {
   refreshBtnLabel();
 }
 
-/* -- Route map --------------------------------------------------- */
 var ROUTES = {
   fullScan:        function(t) { return { url:'/full-scan',       fd:fd('url',t) }; },
   dnsLookup:       function(t) { return { url:'/dnsinfo',         fd:fd('hostname',t) }; },
@@ -180,7 +168,6 @@ var ROUTES = {
 function fd(key, val)  { var f = new FormData(); f.append(key, val); return f; }
 function fdK(key, val) { var f = new FormData(); f.append(key, val); return f; }
 
-/* -- Form submit ------------------------------------------------- */
 document.getElementById('functionalityForm').addEventListener('submit', function(e) {
   e.preventDefault();
   var target = document.getElementById('inputField').value.trim();
@@ -238,7 +225,6 @@ function setBusy(btn, busy) {
   if (!busy) refreshBtnLabel();
 }
 
-/* -- Fetch single check ----------------------------------------- */
 function fetchOne(func, target) {
   var route = ROUTES[func] && ROUTES[func](target);
   if (!route) return Promise.resolve({ _error: 'Unknown check: ' + func });
@@ -253,7 +239,6 @@ function fetchOne(func, target) {
   });
 }
 
-/* -- Scanning overlays ------------------------------------------ */
 var FUNC_LABELS = {
   fullScan:'Running full security scan', dnsLookup:'Querying DNS records',
   dnssec:'Checking DNSSEC', dns:'Resolving nameservers', whois:'Looking up WHOIS data',
@@ -317,7 +302,6 @@ function multiScanningHTML(funcs, target) {
     '</div>';
 }
 
-/* -- Multi-result renderer -------------------------------------- */
 function formatMultiResult(funcs, results, target) {
   var html =
     '<div class="multi-results">' +
@@ -357,7 +341,6 @@ function formatMultiResult(funcs, results, target) {
   return html;
 }
 
-/* -- Full security scan report card ----------------------------- */
 var CLABELS = {
   // Scored checks
   securityHeaders:'Security Headers', tls:'TLS / Cipher', csp:'CSP Policy',
@@ -500,7 +483,6 @@ function gstoggle(card) {
   if (panel) panel.classList.toggle('open');
 }
 
-/* -- Generic result formatter ----------------------------------- */
 function formatResult(func, data) {
   return '<div class="data-display">' +
     '<div class="data-title"><i class="fas fa-terminal" style="margin-right:6px;opacity:0.5"></i>' + (FUNC_LABELS[func] || func) + '</div>' +
@@ -545,7 +527,6 @@ function toggleRaw(btn) {
     : '<i class="fas fa-code"></i> Raw JSON';
 }
 
-/* -- Utility ---------------------------------------------------- */
 function esc(s) {
   if (typeof s !== 'string') return s;
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
