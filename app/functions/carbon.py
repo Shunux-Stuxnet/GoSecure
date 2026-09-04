@@ -1,6 +1,8 @@
 import httpx
 from urllib.parse import urlparse
 
+from app.functions.http_client import resilient_get
+
 
 # Hosts known to run on green/renewable infrastructure (subset of TGWF list)
 GREEN_HOSTERS = {
@@ -23,11 +25,10 @@ async def estimate_carbon(url: str) -> dict:
 
     # 1. Measure page size by fetching the HTML
     try:
-        async with httpx.AsyncClient(timeout=20, verify=False, follow_redirects=True) as client:
-            r = await client.get(url)
+        r = await resilient_get(url)
         page_bytes = len(r.content)
     except Exception as exc:
-        return {"error": str(exc), "message": "Could not fetch page to measure size"}
+        return {"error": repr(exc), "message": "Could not fetch page to measure size"}
 
     if page_bytes == 0:
         return {"error": "Empty response", "message": "Page returned no content"}

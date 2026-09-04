@@ -1,9 +1,10 @@
 import httpx
 
+from app.functions.http_client import resilient_get
+
 
 async def check_hsts(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False) as client:
-        resp = await client.get(url)
+    resp = await resilient_get(url)
 
     hsts_header = resp.headers.get("strict-transport-security", "")
 

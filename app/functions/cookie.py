@@ -35,10 +35,11 @@ def _parse_set_cookie(header_value: str) -> dict:
 
 
 async def find_cookies(domain: str) -> dict:
+    from app.functions.http_client import resilient_get
+
     url = "https://" + domain
 
-    async with httpx.AsyncClient(timeout=10, verify=False) as client:
-        resp = await client.get(url)
+    resp = await resilient_get(url)
 
     raw_cookies = [
         v.decode("utf-8", errors="replace")

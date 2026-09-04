@@ -1,7 +1,3 @@
-"""BIMI (Brand Indicators for Message Identification) record check.
-Looks up the default._bimi.<domain> TXT record which lets mail clients
-display a company logo next to authenticated email."""
-
 import dns.resolver
 import dns.exception
 from urllib.parse import urlparse

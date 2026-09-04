@@ -23,8 +23,8 @@ def _grade(score: int) -> str:
 
 
 async def check_security_headers(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
 
     present = []
     missing = []

@@ -50,6 +50,10 @@ def _in_range(v: tuple, lo: tuple, hi: tuple) -> bool:
 
 
 def _check_version(key: str, version_str: str) -> list:
+    # Without a real version we cannot know if it's in a vulnerable range,
+    # so avoid false positives (e.g. bare "Server: Apache" banner).
+    if version_str == "unknown":
+        return []
     v = _parse_ver(version_str)
     issues = []
     for lo, hi, cve, severity, desc in VULN_DB.get(key, []):
@@ -62,8 +66,8 @@ def _check_version(key: str, version_str: str) -> list:
 
 
 async def check_outdated_software(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
 
     headers = {k.lower(): v for k, v in resp.headers.items()}
     findings = []

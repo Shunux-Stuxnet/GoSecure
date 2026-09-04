@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 import httpx
 
 MAX_HOPS = 10
@@ -36,11 +38,13 @@ async def trace_redirects(url: str) -> dict:
                 break
 
             # Detect HTTPS → HTTP downgrade
-            if current_url.startswith("https://") and location.startswith("http://"):
-                has_http_downgrade = True
-                warnings.append(f"HTTP downgrade detected: {current_url} → {location}")
+            next_url = urljoin(current_url, location)
 
-            current_url = location
+            if current_url.startswith("https://") and next_url.startswith("http://"):
+                has_http_downgrade = True
+                warnings.append(f"HTTP downgrade detected: {current_url} → {next_url}")
+
+            current_url = next_url
         else:
             warnings.append(f"Stopped after {MAX_HOPS} hops")
 

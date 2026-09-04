@@ -55,6 +55,14 @@ from app.functions.ssl_labs import ssl_labs_audit
 router = APIRouter()
 
 
+@router.get("/config")
+async def config_handler():
+    """Public front-end config. Tells the UI whether the server already
+    has a URLhaus key configured (so it won't prompt users for one)."""
+    import os
+    return {"urlhausServerKey": bool(os.environ.get("URLHAUS_AUTH_KEY", "").strip())}
+
+
 @router.post("/dnsinfo")
 async def dns_info_handler(hostname: str = Form(...)):
     if hostname.startswith("http://") or hostname.startswith("https://"):
@@ -420,12 +428,12 @@ async def subdomain_enum_handler(url: str = Form(...)):
 
 
 @router.post("/full-scan")
-async def full_scan_handler(url: str = Form(...)):
+async def full_scan_handler(url: str = Form(...), auth_key: str = Form(None)):
     if not url:
         raise HTTPException(status_code=400, detail="You must provide a URL or domain!")
 
     try:
-        result = await run_full_scan(url)
+        result = await run_full_scan(url, auth_key)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -571,11 +579,11 @@ async def site_features_handler(url: str = Form(...)):
 
 
 @router.post("/malware-check")
-async def malware_check_handler(url: str = Form(...)):
+async def malware_check_handler(url: str = Form(...), auth_key: str = Form(None)):
     if not url:
         raise HTTPException(status_code=400, detail="URL is required")
     try:
-        return await check_malware(url)
+        return await check_malware(url, auth_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

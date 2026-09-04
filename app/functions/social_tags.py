@@ -16,8 +16,8 @@ _TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
 async def audit_social_tags(url: str) -> dict:
     if not url.startswith("http"):
         url = "https://" + url
-    async with httpx.AsyncClient(timeout=15, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
     html = resp.text[:200000]
 
     og, tw, meta = {}, {}, {}

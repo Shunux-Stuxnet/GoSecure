@@ -1,6 +1,3 @@
-"""Subdomain discovery via Certificate Transparency logs (crt.sh).
-Reveals subdomains that have ever had a TLS certificate issued for them."""
-
 import httpx
 from urllib.parse import urlparse
 

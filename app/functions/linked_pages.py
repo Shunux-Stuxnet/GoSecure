@@ -12,8 +12,8 @@ async def audit_linked_pages(url: str) -> dict:
     base = urlparse(url)
     base_host = base.hostname or ""
 
-    async with httpx.AsyncClient(timeout=15, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
     html = resp.text[:500_000]
 
     internal, external, other = set(), set(), set()

@@ -1,8 +1,3 @@
-"""SSL Labs deep TLS security audit (free, no API key).
-NOTE: This is intentionally NOT included in the Full Audit because
-the first scan for any host can take 60-180 seconds. User must
-trigger it manually from the UI."""
-
 import asyncio
 import httpx
 from urllib.parse import urlparse

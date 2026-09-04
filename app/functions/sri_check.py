@@ -22,8 +22,8 @@ def _sri_issue(has_integrity: bool, has_crossorigin: bool) -> Optional[str]:
 
 
 async def audit_sri(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
 
     page_host = urlparse(str(resp.url)).netloc
     soup = BeautifulSoup(resp.text, "html.parser")

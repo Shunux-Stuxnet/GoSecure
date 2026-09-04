@@ -24,8 +24,8 @@
     </div>
     <div class="header-right">
       <div class="mode-toggle" id="modeToggle">
-        <button class="mode-btn active" data-mode="beginner"><i class="fas fa-user"></i> Beginner</button>
-        <button class="mode-btn" data-mode="pro"><i class="fas fa-terminal"></i> Pro</button>
+        <button class="mode-btn active" data-mode="beginner" aria-label="Beginner view" title="Beginner view"><i class="fas fa-user"></i></button>
+        <button class="mode-btn" data-mode="pro" aria-label="Pro view" title="Pro view"><i class="fas fa-terminal"></i></button>
       </div>
     </div>
   </header>
@@ -33,7 +33,7 @@
   <main>
     <div class="hero beginner-only">
       <h1>Is your website <span class="gradient-text">actually secure?</span></h1>
-      <p>Enter any URL and get a comprehensive security report in seconds. No technical knowledge required.</p>
+      <p>Enter any URL and get a small comprehensive security report in seconds. No technical knowledge required.</fp>
     </div>
 
     <div class="scanner-card">
@@ -510,17 +510,62 @@
             </button>
           </div>
           <p class="input-hint beginner-only">Just type the website address &#8212; no need for https:// or www</p>
+          <div class="scan-tools">
+            <label class="scan-tool" title="Serve repeat checks instantly from your browser's local cache">
+              <input type="checkbox" id="useCache" checked> <i class="fas fa-bolt"></i> Fast cache
+            </label>
+            <button type="button" class="scan-tool-btn" id="historyBtn" title="View past scans">
+              <i class="fas fa-clock-rotate-left"></i> History
+            </button>
+            <button type="button" class="scan-tool-btn" id="clearCacheBtn" title="Clear local cache">
+              <i class="fas fa-trash-can"></i> Clear cache
+            </button>
+            <button type="button" class="scan-tool-btn" id="urlhausSettingsBtn" title="Configure URLhaus threat intelligence">
+              <i class="fas fa-key"></i> Threat intel
+            </button>
+          </div>
         </div>
 
       </form>
     </div><!-- /scanner-card -->
 
     <div id="responseContainer" style="display:none"></div>
+
+    <div id="urlhausDialog" class="settings-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="urlhausDialogTitle">
+      <div class="settings-panel">
+        <div class="settings-head">
+          <div><i class="fas fa-shield-virus"></i> <span id="urlhausDialogTitle">Threat intelligence</span></div>
+          <button type="button" class="scan-tool-btn" id="urlhausCloseBtn" aria-label="Close settings"><i class="fas fa-xmark"></i></button>
+        </div>
+        <p class="settings-copy">Add your optional abuse.ch URLhaus Auth-Key to enable malware and phishing lookups. It stays in this browser session.</p>
+        <label class="settings-label" for="urlhausKeyInput">URLhaus Auth-Key</label>
+        <input id="urlhausKeyInput" class="settings-input" type="password" autocomplete="off" placeholder="Paste Auth-Key">
+        <div class="settings-actions">
+          <button type="button" class="scan-tool-btn" id="urlhausClearBtn">Remove key</button>
+          <button type="button" class="scan-tool-btn primary" id="urlhausSaveBtn"><i class="fas fa-check"></i> Save key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan history overlay -->
+    <div id="historyOverlay" class="history-overlay" style="display:none">
+      <div class="history-panel">
+        <div class="history-panel-head">
+          <div class="history-panel-title"><i class="fas fa-clock-rotate-left"></i> Scan History</div>
+          <div class="history-panel-actions">
+            <button type="button" id="historyClearBtn" class="scan-tool-btn"><i class="fas fa-trash-can"></i> Clear all</button>
+            <button type="button" id="historyCloseBtn" class="scan-tool-btn"><i class="fas fa-xmark"></i> Close</button>
+          </div>
+        </div>
+        <div id="historyBody" class="history-body"></div>
+      </div>
+    </div>
   </main>
 
   <footer>GoSecure &copy; 2026 &mdash; Web Security Intelligence Platform</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/static/db.js"></script>
   <script src="/static/script.js"></script>
 </body>
 </html>

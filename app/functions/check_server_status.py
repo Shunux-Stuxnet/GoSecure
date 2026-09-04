@@ -11,8 +11,9 @@ async def check_server_status(raw_url: str) -> str:
 
     start_time = time.time()
 
-    async with httpx.AsyncClient(timeout=10, verify=False) as client:
-        resp = await client.get(raw_url)
+    from app.functions.http_client import resilient_get
+
+    resp = await resilient_get(raw_url)
 
     response_time = time.time() - start_time
 

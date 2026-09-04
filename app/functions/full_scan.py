@@ -176,7 +176,7 @@ EVALUATORS = {
 }
 
 
-async def run_full_scan(url: str) -> dict:
+async def run_full_scan(url: str, auth_key: str = None) -> dict:
     if not url.startswith("http"):
         url = "https://" + url
     parsed = urlparse(url)
@@ -184,16 +184,24 @@ async def run_full_scan(url: str) -> dict:
     https_url = f"https://{domain}"
     start = time.time()
 
+    # Limit concurrent outbound requests to the target host so WAFs/CDNs
+    # (e.g. Akamai) don't throttle the burst and return empty errors.
+    sem = asyncio.Semaphore(8)
+
     async def safe(name: str, coro):
-        try:
-            return name, await coro, None
-        except Exception as exc:
-            return name, None, str(exc)
+        async with sem:
+            try:
+                return name, await coro, None
+            except Exception as exc:
+                return name, None, repr(exc) if not str(exc) else f"{type(exc).__name__}: {exc}"
 
     async def _sitemap_check(d: str):
-        sitemap_url = await get_sitemap_url(d)
+        try:
+            sitemap_url = await get_sitemap_url(d)
+        except Exception:
+            return {"found": False, "note": "No sitemap declared in robots.txt"}
         content = await fetch_sitemap(sitemap_url)
-        return {"url": sitemap_url, "content": content[:2000] if content else ""}
+        return {"found": True, "url": sitemap_url, "content": content[:2000] if content else ""}
 
     raw = await asyncio.gather(
         # --- Scored security checks ---
@@ -240,7 +248,7 @@ async def run_full_scan(url: str) -> dict:
         safe("dnsBlocks",        check_dns_blocks(domain)),
         # --- Phase 6: web-check parity (free, no key) ---
         safe("siteFeatures",     audit_site_features(https_url)),
-        safe("malwareCheck",     check_malware(https_url)),
+        safe("malwareCheck",     check_malware(https_url, auth_key)),
         safe("globalRanking",    get_global_ranking(https_url)),
         safe("sslChain",         get_ssl_chain(domain)),
         safe("ctSubdomains",     find_ct_subdomains(domain)),
@@ -291,10 +299,21 @@ async def run_full_scan(url: str) -> dict:
         if s in counts:
             counts[s] += 1
 
+    scored_errors = sum(
+        1 for name in EVALUATORS
+        if checks.get(name, {}).get("status") == "error"
+    )
+    score_available = scored_errors == 0
+
     return {
         "domain": domain,
-        "overallGrade": _grade(total_earned),
-        "overallScore": total_earned,
+        "overallGrade": _grade(total_earned) if score_available else "N/A",
+        "overallScore": total_earned if score_available else None,
+        "scoreAvailable": score_available,
+        "scoreNote": (
+            None if score_available else
+            f"{scored_errors} scored check(s) could not run; the security grade is unavailable."
+        ),
         "summary": counts,
         "checks": checks,
         "scanDuration": round(time.time() - start, 2),

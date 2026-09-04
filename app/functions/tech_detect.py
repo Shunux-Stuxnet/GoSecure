@@ -186,8 +186,8 @@ def _meta_generator(body: str) -> str:
 
 
 async def detect_tech(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
 
     headers = {k.lower(): v for k, v in resp.headers.items()}
     cookie_str = " ".join(

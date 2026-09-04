@@ -11,8 +11,8 @@ def _parse_frame_ancestors(csp: str) -> Optional[str]:
 
 
 async def check_clickjacking(url: str) -> dict:
-    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=True) as client:
-        resp = await client.get(url)
+    from app.functions.http_client import resilient_get
+    resp = await resilient_get(url)
 
     xfo = resp.headers.get("X-Frame-Options")
     csp = resp.headers.get("Content-Security-Policy", "")

@@ -1,6 +1,3 @@
-"""Global website ranking via the Tranco list (free, no key).
-Tranco is a research-grade aggregation of Alexa, Majestic, Umbrella & Cisco lists."""
-
 import httpx
 from urllib.parse import urlparse
 

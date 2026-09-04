@@ -1,3 +1,10 @@
+/* ================================================================
+   GoSecure -- script.js
+   Animated bg, dual-mode, security scan report card,
+   multi-select parallel checks, rich data display
+   ================================================================ */
+
+/* -- Animated background (particle network) --------------------- */
 (function initBg() {
   var canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
@@ -44,15 +51,36 @@
   window.addEventListener('resize', function() { resize(); make(); });
 })();
 
+var currentView = null;
+var scanGeneration = 0;
+
+/* -- Mode toggle ------------------------------------------------- */
 document.querySelectorAll('.mode-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
     this.classList.add('active');
     document.body.classList.remove('mode-beginner', 'mode-pro');
     document.body.classList.add('mode-' + this.dataset.mode);
+    rerenderCurrentView();
   });
 });
 
+function rerenderCurrentView() {
+  if (!currentView) return;
+  var rc = document.getElementById('responseContainer');
+  if (!rc) return;
+  if (currentView.kind === 'full') {
+    rc.innerHTML = formatFullScan(currentView.data);
+    return;
+  }
+  rc.innerHTML = multiResultsShell(currentView.funcs, currentView.target);
+  currentView.funcs.forEach(function(func, i) {
+    var slot = document.getElementById('mrc-' + i);
+    if (slot) slot.outerHTML = resultCardHTML(func, currentView.results[i], i, currentView.target);
+  });
+}
+
+/* -- Tab switching ----------------------------------------------- */
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -64,6 +92,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
   });
 });
 
+/* -- Checkbox change listeners ----------------------------------- */
 document.addEventListener('change', function(e) {
   if (e.target && e.target.type === 'checkbox' && e.target.name === 'functionality') {
     var tab = e.target.closest('.tab-content');
@@ -101,6 +130,7 @@ function refreshBtnLabel() {
   }
 }
 
+/* -- Select All / None helpers (called from HTML) ---------------- */
 function selectAll(btn) {
   var tab = btn.closest('.tab-content');
   tab.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
@@ -114,6 +144,7 @@ function selectNone(btn) {
   refreshBtnLabel();
 }
 
+/* -- Route map --------------------------------------------------- */
 var ROUTES = {
   fullScan:        function(t) { return { url:'/full-scan',       fd:fd('url',t) }; },
   dnsLookup:       function(t) { return { url:'/dnsinfo',         fd:fd('hostname',t) }; },
@@ -168,55 +199,153 @@ var ROUTES = {
 function fd(key, val)  { var f = new FormData(); f.append(key, val); return f; }
 function fdK(key, val) { var f = new FormData(); f.append(key, val); return f; }
 
+/* -- URLhaus (abuse.ch) Auth-Key ---------------------------------
+   The key belongs to the individual user's free abuse.ch account and
+   is kept only in this browser session (never persisted to disk or
+   sent anywhere except the malware/full-scan request). -------------- */
+function getUrlhausKey() {
+  try { return sessionStorage.getItem('gs_urlhaus_key') || ''; } catch (_) { return ''; }
+}
+function setUrlhausKey(k) {
+  try {
+    if (k) sessionStorage.setItem('gs_urlhaus_key', k);
+    else   sessionStorage.removeItem('gs_urlhaus_key');
+  } catch (_) {}
+}
+/* Whether the server already has its own URLhaus key (fetched once). */
+var _serverHasUrlhausKey = null;
+function serverHasUrlhausKey() {
+  if (_serverHasUrlhausKey !== null) return Promise.resolve(_serverHasUrlhausKey);
+  return fetch('/config').then(function(r) { return r.json(); })
+    .then(function(cfg) { _serverHasUrlhausKey = !!(cfg && cfg.urlhausServerKey); return _serverHasUrlhausKey; })
+    .catch(function() { _serverHasUrlhausKey = false; return false; });
+}
+var urlhausDialogPromise = null;
+function openUrlhausDialog() {
+  if (urlhausDialogPromise) return urlhausDialogPromise;
+  var overlay = document.getElementById('urlhausDialog');
+  var input = document.getElementById('urlhausKeyInput');
+  if (!overlay || !input) return Promise.resolve('');
+  input.value = getUrlhausKey();
+  overlay.style.display = 'flex';
+  input.focus();
+  urlhausDialogPromise = new Promise(function(resolve) {
+    function close(value) {
+      overlay.style.display = 'none';
+      urlhausDialogPromise = null;
+      resolve(value || '');
+    }
+    document.getElementById('urlhausSaveBtn').onclick = function() {
+      var key = input.value.trim();
+      setUrlhausKey(key);
+      close(key);
+    };
+    document.getElementById('urlhausClearBtn').onclick = function() {
+      setUrlhausKey('');
+      input.value = '';
+      close('');
+    };
+    document.getElementById('urlhausCloseBtn').onclick = function() { close(getUrlhausKey()); };
+    overlay.onclick = function(e) { if (e.target === overlay) close(getUrlhausKey()); };
+  });
+  return urlhausDialogPromise;
+}
+
+var urlhausSettingsBtn = document.getElementById('urlhausSettingsBtn');
+if (urlhausSettingsBtn) urlhausSettingsBtn.addEventListener('click', openUrlhausDialog);
+
+function ensureUrlhausKey(mode) {
+  return serverHasUrlhausKey().then(function(hasServerKey) {
+    if (hasServerKey) return '';
+    var existing = getUrlhausKey();
+    if (existing) return existing;
+    return mode === 'required' ? openUrlhausDialog() : '';
+  });
+}
+
+/* -- Per-check cache TTLs (ms). Default applies when unlisted. --- */
+var HOUR = 3600000, DAY = 86400000;
+var CACHE_TTL = {
+  whois: DAY, dns: HOUR, dnsLookup: HOUR, dnssec: DAY, caaRecords: DAY,
+  globalRanking: DAY, archiveHistory: DAY, ipGeo: DAY, carbon: DAY,
+  subdomainEnum: DAY, ctSubdomains: DAY, techDetect: HOUR, SSLInfo: HOUR,
+  sslChain: HOUR, sslLabs: DAY, tlsAnalysis: HOUR, cipherSuites: HOUR,
+  securityHeaders: HOUR, emailSecurity: HOUR, bimi: DAY, malwareCheck: HOUR,
+  fullScan: HOUR
+};
+var DEFAULT_TTL = 30 * 60000;
+function ttlFor(func) { return CACHE_TTL[func] != null ? CACHE_TTL[func] : DEFAULT_TTL; }
+
+/* -- Form submit ------------------------------------------------- */
 document.getElementById('functionalityForm').addEventListener('submit', function(e) {
   e.preventDefault();
   var target = document.getElementById('inputField').value.trim();
   if (!target) { document.getElementById('inputField').focus(); return; }
-
+  var generation = ++scanGeneration;
   var activeTab = document.querySelector('.tab-btn.active').dataset.tab;
   var btn = document.getElementById('scanBtn');
   var rc  = document.getElementById('responseContainer');
 
   if (activeTab === 'fullscan') {
-    setBusy(btn, true);
-    rc.style.display = 'block';
-    rc.innerHTML = scanningHTML('fullScan', target);
-    fetchOne('fullScan', target).then(function(data) {
-      setBusy(btn, false);
-      if (data._error) {
-        rc.innerHTML = '<div class="error-card"><i class="fas fa-circle-xmark"></i> ' + esc(data._error) + '</div>';
-      } else {
-        rc.innerHTML = formatFullScan(data);
-      }
+    ensureUrlhausKey('optional').then(function() {
+      setBusy(btn, true);
+      rc.style.display = 'block';
+      rc.innerHTML = scanningHTML('fullScan', target);
+      fetchOne('fullScan', target, true).then(function(data) {
+        if (generation !== scanGeneration) return;
+        setBusy(btn, false);
+        if (data._error) {
+          rc.innerHTML = '<div class="error-card"><i class="fas fa-circle-xmark"></i> ' + esc(data._error) + '</div>';
+        } else {
+          currentView = { kind:'full', data:stripMeta(data) };
+          rc.innerHTML = formatFullScan(stripMeta(data));
+          if (window.GSDB) GSDB.saveScan(target, ['fullScan'], stripMeta(data));
+        }
+      });
     });
     return;
   }
 
-  // Multi-check tabs
   var tabEl = document.getElementById('tab-' + activeTab);
   var checked = tabEl.querySelectorAll('input[type="checkbox"]:checked');
   var funcs = [];
   checked.forEach(function(cb) { funcs.push(cb.value); });
-
-  if (!funcs.length) {
-    alert('Select at least one check from the list above.');
-    return;
+  if (!funcs.length) { alert('Select at least one check from the list above.'); return; }
+  if (funcs.indexOf('malwareCheck') !== -1) {
+    ensureUrlhausKey('required').then(function() { runMultiScan(funcs, target, btn, rc, false); });
+  } else {
+    runMultiScan(funcs, target, btn, rc, false);
   }
+});
 
+/* -- Progressive multi-scan (renders each card as it resolves) --- */
+function runMultiScan(funcs, target, btn, rc, forceRefresh) {
   setBusy(btn, true);
   rc.style.display = 'block';
-  rc.innerHTML = multiScanningHTML(funcs, target);
+  rc.innerHTML = multiResultsShell(funcs, target);
 
-  var promises = funcs.map(function(f) { return fetchOne(f, target); });
+  var results = new Array(funcs.length);
+  var remaining = funcs.length;
 
-  Promise.all(promises).then(function(results) {
-    setBusy(btn, false);
-    rc.innerHTML = formatMultiResult(funcs, results, target);
-  }).catch(function(err) {
-    setBusy(btn, false);
-    rc.innerHTML = '<div class="error-card"><i class="fas fa-circle-xmark"></i> ' + esc(err.message) + '</div>';
+  funcs.forEach(function(func, i) {
+    fetchOne(func, target, forceRefresh).then(function(data) {
+      results[i] = data;
+      var slot = document.getElementById('mrc-' + i);
+      if (slot) slot.outerHTML = resultCardHTML(func, data, i, target);
+    }).catch(function(err) {
+      results[i] = { _error: err.message };
+      var slot = document.getElementById('mrc-' + i);
+      if (slot) slot.outerHTML = resultCardHTML(func, results[i], i, target);
+    }).then(function() {
+      remaining -= 1;
+      if (remaining === 0) {
+        setBusy(btn, false);
+        currentView = { kind:'multi', funcs:funcs, target:target, results:results };
+        if (window.GSDB) GSDB.saveScan(target, funcs, results);
+      }
+    });
   });
-});
+}
 
 function setBusy(btn, busy) {
   btn.disabled = busy;
@@ -225,9 +354,14 @@ function setBusy(btn, busy) {
   if (!busy) refreshBtnLabel();
 }
 
-function fetchOne(func, target) {
+/* -- Fetch single check (cache-aware) --------------------------- */
+function networkFetch(func, target) {
   var route = ROUTES[func] && ROUTES[func](target);
   if (!route) return Promise.resolve({ _error: 'Unknown check: ' + func });
+  if ((func === 'malwareCheck' || func === 'fullScan') && route.fd) {
+    var k = getUrlhausKey();
+    if (k) route.fd.append('auth_key', k);
+  }
   var p = route.fd ? fetch(route.url, { method:'POST', body:route.fd }) : fetch(route.url);
   return p.then(function(r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -239,6 +373,34 @@ function fetchOne(func, target) {
   });
 }
 
+function cachingEnabled() {
+  var el = document.getElementById('useCache');
+  return !!(window.GSDB && (!el || el.checked));
+}
+
+function fetchOne(func, target, forceRefresh) {
+  if (!cachingEnabled() || forceRefresh) {
+    return networkFetch(func, target).then(function(data) {
+      if (cachingEnabled() && !(data && data._error)) {
+        GSDB.cacheSet(target, func, data, ttlFor(func));
+      }
+      return data;
+    });
+  }
+  return GSDB.cacheGet(target, func).then(function(row) {
+    if (row) {
+      var d = row.result;
+      if (d && typeof d === 'object') { d = Object.assign({}, d); d._cachedAt = row.ts; }
+      return d;
+    }
+    return networkFetch(func, target).then(function(data) {
+      if (!(data && data._error)) GSDB.cacheSet(target, func, data, ttlFor(func));
+      return data;
+    });
+  });
+}
+
+/* -- Scanning overlays ------------------------------------------ */
 var FUNC_LABELS = {
   fullScan:'Running full security scan', dnsLookup:'Querying DNS records',
   dnssec:'Checking DNSSEC', dns:'Resolving nameservers', whois:'Looking up WHOIS data',
@@ -302,7 +464,8 @@ function multiScanningHTML(funcs, target) {
     '</div>';
 }
 
-function formatMultiResult(funcs, results, target) {
+/* -- Multi-result renderer (progressive) ------------------------ */
+function multiResultsShell(funcs, target) {
   var html =
     '<div class="multi-results">' +
     '<div class="multi-results-header">' +
@@ -311,36 +474,96 @@ function formatMultiResult(funcs, results, target) {
     '</div>';
 
   funcs.forEach(function(func, i) {
-    var data = results[i];
-    var lbl  = FUNC_LABELS[func] || func;
-    var ico  = FUNC_ICONS[func]  || 'fa-circle-dot';
-    var isErr = data && (data._error || data._raw);
-
+    var lbl = FUNC_LABELS[func] || func;
+    var ico = FUNC_ICONS[func] || 'fa-circle-dot';
     html +=
-      '<div class="multi-result-card' + (isErr ? ' card-error' : '') + '">' +
+      '<div class="multi-result-card" id="mrc-' + i + '">' +
         '<div class="multi-result-header">' +
-          '<div class="header-icon' + (isErr ? ' icon-error' : '') + '"><i class="fas ' + ico + '"></i></div>' +
-          lbl +
+          '<div class="header-icon"><i class="fas ' + ico + '"></i></div>' + lbl +
         '</div>' +
-        '<div class="multi-result-body">';
-
-    if (data && data._error) {
-      html += '<div class="error-inline"><i class="fas fa-circle-xmark"></i> ' + esc(data._error) + '</div>';
-    } else if (data && data._raw) {
-      html += '<pre style="color:var(--text-muted);font-size:12px;white-space:pre-wrap;overflow:auto">' + esc(data._raw) + '</pre>';
-    } else {
-      html += renderObj(data, 0);
-      html += '<button class="raw-toggle" onclick="toggleRaw(this)"><i class="fas fa-code"></i> Raw JSON</button>';
-      html += '<div class="raw-json">' + esc(JSON.stringify(data, null, 2)) + '</div>';
-    }
-
-    html += '</div></div>';
+        '<div class="multi-result-body">' +
+          '<div class="scan-inline"><i class="fas fa-spinner fa-spin"></i> ' + (FUNC_LABELS[func] || 'Scanning') + '<span class="scan-dots"></span></div>' +
+        '</div>' +
+      '</div>';
   });
 
   html += '</div>';
   return html;
 }
 
+function resultCardHTML(func, data, i, target) {
+  var lbl  = FUNC_LABELS[func] || func;
+  var ico  = FUNC_ICONS[func]  || 'fa-circle-dot';
+  var isErr = data && (data._error || data._raw);
+  var cached = data && data._cachedAt;
+
+  var badge = cached
+    ? ' <span class="cache-badge" title="Served from local cache">' +
+        '<i class="fas fa-database"></i> cached ' + timeAgo(data._cachedAt) +
+        ' <button class="cache-refresh" onclick="refreshCard(\'' + func + '\',' + i + ',\'' + escAttr(target) + '\')" title="Force refresh"><i class="fas fa-rotate"></i></button>' +
+      '</span>'
+    : '';
+
+  var html =
+    '<div class="multi-result-card' + (isErr ? ' card-error' : '') + '" id="mrc-' + i + '">' +
+      '<div class="multi-result-header">' +
+        '<div class="header-icon' + (isErr ? ' icon-error' : '') + '"><i class="fas ' + ico + '"></i></div>' +
+        lbl + badge +
+      '</div>' +
+      '<div class="multi-result-body">';
+
+  if (data && data._error) {
+    html += '<div class="error-inline"><i class="fas fa-circle-xmark"></i> ' + esc(data._error) + '</div>';
+  } else if (data && data._raw) {
+    html += '<pre style="color:var(--text-muted);font-size:12px;white-space:pre-wrap;overflow:auto">' + esc(data._raw) + '</pre>';
+  } else {
+    var clean = stripMeta(data);
+    var raw = JSON.stringify(clean, null, 2);
+    if (document.body.classList.contains('mode-pro')) {
+      html += terminalOutputHTML(raw);
+    } else {
+      html += renderObj(clean, 0);
+      html += '<button class="raw-toggle" onclick="toggleRaw(this)"><i class="fas fa-code"></i> Raw JSON</button>';
+      html += '<div class="raw-json">' + esc(raw) + '</div>';
+    }
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+/* Re-fetch a single card, bypassing the cache */
+function refreshCard(func, i, target) {
+  var slot = document.getElementById('mrc-' + i);
+  if (slot) {
+    slot.querySelector('.multi-result-body').innerHTML =
+      '<div class="scan-inline"><i class="fas fa-spinner fa-spin"></i> Refreshing<span class="scan-dots"></span></div>';
+  }
+  fetchOne(func, target, true).then(function(data) {
+    var el = document.getElementById('mrc-' + i);
+    if (el) el.outerHTML = resultCardHTML(func, data, i, target);
+  });
+}
+
+function stripMeta(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (data._cachedAt == null) return data;
+  var c = Object.assign({}, data);
+  delete c._cachedAt;
+  return c;
+}
+
+function timeAgo(ts) {
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function escAttr(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+/* -- Full security scan report card ----------------------------- */
 var CLABELS = {
   // Scored checks
   securityHeaders:'Security Headers', tls:'TLS / Cipher', csp:'CSP Policy',
@@ -422,10 +645,10 @@ var GCOL = { A:'#00FF9C', B:'#7BFF7B', C:'#FFD60A', D:'#FF9500', F:'#FF3B5C' };
 
 function formatFullScan(data) {
   var grade = data.overallGrade || '?';
-  var score = data.overallScore || 0;
+  var score = typeof data.overallScore === 'number' ? data.overallScore : null;
   var gc    = GCOL[grade] || '#ccc';
   var s     = data.summary || {};
-  var deg   = Math.round(score * 3.6) + 'deg';
+  var deg   = score === null ? '0deg' : Math.round(score * 3.6) + 'deg';
   var isPro = document.body.classList.contains('mode-pro');
 
   var top =
@@ -434,11 +657,12 @@ function formatFullScan(data) {
       '<div class="gauge-wrap"><div class="gauge-ring" style="--grade-color:' + gc + ';--score-deg:' + deg + '">' +
         '<div class="gauge-inner">' +
           '<span class="gauge-grade" style="color:' + gc + '">' + grade + '</span>' +
-          '<span class="gauge-score">' + score + '/100</span>' +
+          '<span class="gauge-score">' + (score === null ? 'N/A' : score + '/100') + '</span>' +
         '</div></div></div>' +
       '<div class="report-meta">' +
         '<div class="report-domain">' + esc(data.domain || '') + '</div>' +
         '<div class="report-subtitle">Scanned in ' + (data.scanDuration||0) + 's &nbsp;&mdash;&nbsp; ' + new Date().toLocaleTimeString() + '</div>' +
+        (data.scoreNote ? '<div class="report-score-note"><i class="fas fa-triangle-exclamation"></i> ' + esc(data.scoreNote) + '</div>' : '') +
         '<div class="report-summary">' +
           '<div class="summary-stat"><span class="summary-num s-pass">' + (s.pass||0) + '</span><span class="summary-lbl">Passed</span></div>' +
           '<div class="summary-stat"><span class="summary-num s-warn">' + (s.warn||0) + '</span><span class="summary-lbl">Warnings</span></div>' +
@@ -447,9 +671,13 @@ function formatFullScan(data) {
       '</div>' +
     '</div>';
 
-  var grid = '<div class="report-checks-section"><div class="report-checks-title">Check Details &mdash; click any row to expand</div><div class="report-checks-grid">';
-
+  var scored = [], informational = [];
   Object.keys(data.checks || {}).forEach(function(key) {
+    if (data.checks[key].maxScore !== undefined) scored.push(key);
+    else informational.push(key);
+  });
+
+  function renderCheck(key) {
     var c     = data.checks[key];
     var st    = c.status || 'error';
     var lbl   = CLABELS[key] || key;
@@ -460,8 +688,7 @@ function formatFullScan(data) {
     var msg   = isPro ? (pts ? pts + ' pts' : st) : (msgs[st] || st);
     var detail= JSON.stringify(c.data || {}, null, 2);
 
-    grid +=
-      '<div class="check-result-wrap">' +
+    return '<div class="check-result-wrap">' +
         '<div class="check-result-card" onclick="gstoggle(this)">' +
           '<div class="crc-icon st-' + st + '"><i class="fas ' + stIco + '"></i></div>' +
           '<div class="crc-body">' +
@@ -472,9 +699,20 @@ function formatFullScan(data) {
         '</div>' +
         '<div class="check-detail-panel"><div class="check-detail-inner">' + esc(detail) + '</div></div>' +
       '</div>';
-  });
+  }
 
-  grid += '</div></div></div>';
+  var grid = '<div class="report-checks-section">' +
+    '<div class="report-checks-title"><i class="fas fa-shield-halved"></i> Security score <span>Scored checks used for the A&ndash;F grade</span></div>' +
+    '<div class="report-checks-grid">' + scored.map(renderCheck).join('') + '</div>';
+  if (informational.length) {
+    grid += '<div class="report-checks-title info-section-title"><i class="fas fa-circle-info"></i> Additional information <span>Supporting checks that do not affect the grade</span></div>' +
+      '<div class="report-checks-grid info-grid">' + informational.map(renderCheck).join('') + '</div>';
+  }
+
+  grid += '</div></div>';
+  if (isPro) {
+    top += '<div class="pro-report-terminal">' + terminalOutputHTML(JSON.stringify(data, null, 2)) + '</div>';
+  }
   return top + grid;
 }
 
@@ -483,6 +721,7 @@ function gstoggle(card) {
   if (panel) panel.classList.toggle('open');
 }
 
+/* -- Generic result formatter ----------------------------------- */
 function formatResult(func, data) {
   return '<div class="data-display">' +
     '<div class="data-title"><i class="fas fa-terminal" style="margin-right:6px;opacity:0.5"></i>' + (FUNC_LABELS[func] || func) + '</div>' +
@@ -527,7 +766,177 @@ function toggleRaw(btn) {
     : '<i class="fas fa-code"></i> Raw JSON';
 }
 
+function terminalOutputHTML(raw) {
+  return '<div class="terminal-output">' +
+    '<div class="terminal-toolbar"><span><i class="fas fa-terminal"></i> Full response</span>' +
+    '<button class="copy-btn" onclick="copyTerminal(this)" title="Copy response"><i class="fas fa-copy"></i> Copy</button></div>' +
+    '<pre class="terminal-json">' + esc(raw) + '</pre></div>';
+}
+
+function copyTerminal(btn) {
+  var raw = btn.closest('.terminal-output').querySelector('.terminal-json').textContent;
+  navigator.clipboard.writeText(raw).then(function() {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+    setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 1400);
+  }).catch(function() { toast('Clipboard access unavailable'); });
+}
+
+/* -- Utility ---------------------------------------------------- */
 function esc(s) {
   if (typeof s !== 'string') return s;
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ================================================================
+   Scan history + diff (IndexedDB-backed)
+   ================================================================ */
+(function initHistoryUI() {
+  var openBtn   = document.getElementById('historyBtn');
+  var overlay   = document.getElementById('historyOverlay');
+  var closeBtn  = document.getElementById('historyCloseBtn');
+  var clearBtn  = document.getElementById('historyClearBtn');
+  var clearCache= document.getElementById('clearCacheBtn');
+  var body      = document.getElementById('historyBody');
+  if (!openBtn || !overlay) return;
+
+  var diffSel = []; // selected scan ids for diff
+
+  function openHistory() { overlay.style.display = 'flex'; renderHistory(); }
+  function closeHistory() { overlay.style.display = 'none'; diffSel = []; }
+
+  openBtn.addEventListener('click', openHistory);
+  closeBtn.addEventListener('click', closeHistory);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeHistory(); });
+
+  clearBtn.addEventListener('click', function() {
+    if (!window.GSDB) return;
+    if (confirm('Delete all saved scans?')) GSDB.clearScans().then(renderHistory);
+  });
+  if (clearCache) clearCache.addEventListener('click', function() {
+    if (window.GSDB) GSDB.cacheClear().then(function(){ toast('Local cache cleared'); });
+  });
+
+  function renderHistory() {
+    if (!window.GSDB) { body.innerHTML = '<p class="text-muted">Local storage unavailable.</p>'; return; }
+    GSDB.getScans().then(function(scans) {
+      if (!scans.length) { body.innerHTML = '<p class="text-muted">No scans saved yet. Run a scan to build history.</p>'; return; }
+      var html = '<div class="history-hint">Select two scans of the same target to diff.</div><ul class="history-list">';
+      scans.forEach(function(s) {
+        var checks = (s.checks || []).length;
+        var sel = diffSel.indexOf(s.id) !== -1;
+        html +=
+          '<li class="history-item' + (sel ? ' sel' : '') + '">' +
+            '<label class="history-pick"><input type="checkbox" data-id="' + s.id + '"' + (sel?' checked':'') + '></label>' +
+            '<div class="history-meta">' +
+              '<div class="history-domain">' + esc(s.domain) + '</div>' +
+              '<div class="history-sub">' + checks + ' check' + (checks!==1?'s':'') + ' &middot; ' + new Date(s.ts).toLocaleString() + '</div>' +
+            '</div>' +
+            '<div class="history-item-actions">' +
+              '<button class="scan-tool-btn" data-view="' + s.id + '"><i class="fas fa-eye"></i> View</button>' +
+              '<button class="scan-tool-btn" data-del="' + s.id + '"><i class="fas fa-trash-can"></i></button>' +
+            '</div>' +
+          '</li>';
+      });
+      html += '</ul>';
+      if (diffSel.length === 2) html += '<div class="history-diff-bar"><button class="scan-tool-btn primary" id="doDiffBtn"><i class="fas fa-code-compare"></i> Compare selected</button></div>';
+      html += '<div id="historyDiffOut"></div>';
+      body.innerHTML = html;
+      wireHistory(scans);
+    });
+  }
+
+  function wireHistory(scans) {
+    body.querySelectorAll('input[type="checkbox"][data-id]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var id = Number(cb.getAttribute('data-id'));
+        var idx = diffSel.indexOf(id);
+        if (cb.checked && idx === -1) diffSel.push(id);
+        else if (!cb.checked && idx !== -1) diffSel.splice(idx, 1);
+        if (diffSel.length > 2) diffSel = diffSel.slice(-2);
+        renderHistory();
+      });
+    });
+    body.querySelectorAll('button[data-view]').forEach(function(b) {
+      b.addEventListener('click', function() { viewScan(Number(b.getAttribute('data-view')), scans); });
+    });
+    body.querySelectorAll('button[data-del]').forEach(function(b) {
+      b.addEventListener('click', function() { GSDB.deleteScan(Number(b.getAttribute('data-del'))).then(renderHistory); });
+    });
+    var diffBtn = document.getElementById('doDiffBtn');
+    if (diffBtn) diffBtn.addEventListener('click', function() { runDiff(scans); });
+  }
+
+  function viewScan(id, scans) {
+    var s = findScan(scans, id);
+    if (!s) return;
+    var rc = document.getElementById('responseContainer');
+    rc.style.display = 'block';
+    if (s.checks.length === 1 && s.checks[0] === 'fullScan') {
+      currentView = { kind:'full', data:stripMeta(s.payload) };
+      rc.innerHTML = formatFullScan(stripMeta(s.payload));
+    } else {
+      currentView = { kind:'multi', funcs:s.checks, target:s.domain, results:s.payload };
+      rc.innerHTML = multiResultsShell(s.checks, s.domain);
+      s.checks.forEach(function(func, i) {
+        var slot = document.getElementById('mrc-' + i);
+        if (slot) slot.outerHTML = resultCardHTML(func, s.payload[i], i, s.domain);
+      });
+    }
+    closeHistory();
+    rc.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function runDiff(scans) {
+    var a = findScan(scans, diffSel[0]);
+    var b = findScan(scans, diffSel[1]);
+    var out = document.getElementById('historyDiffOut');
+    if (!a || !b) return;
+    if (a.domain !== b.domain) { out.innerHTML = '<div class="error-inline">Pick two scans of the same target to diff.</div>'; return; }
+    // order old -> new
+    var older = a.ts <= b.ts ? a : b;
+    var newer = a.ts <= b.ts ? b : a;
+    var mapOld = scanMap(older), mapNew = scanMap(newer);
+    var keys = Object.keys(mapOld).concat(Object.keys(mapNew)).filter(function(v,i,arr){return arr.indexOf(v)===i;});
+    var rows = '';
+    keys.forEach(function(k) {
+      var o = mapOld[k], n = mapNew[k];
+      var changed = JSON.stringify(o) !== JSON.stringify(n);
+      var state = o == null ? 'added' : n == null ? 'removed' : (changed ? 'changed' : 'same');
+      if (state === 'same') return;
+      rows +=
+        '<div class="diff-row diff-' + state + '">' +
+          '<span class="diff-tag">' + state + '</span>' +
+          '<span class="diff-key">' + esc(CLABELS[k] || FUNC_LABELS[k] || k) + '</span>' +
+        '</div>';
+    });
+    if (!rows) rows = '<div class="diff-row diff-same"><span class="diff-key">No differences detected.</span></div>';
+    out.innerHTML =
+      '<div class="diff-head"><i class="fas fa-code-compare"></i> ' + esc(older.domain) + ' &middot; ' +
+        new Date(older.ts).toLocaleString() + ' &rarr; ' + new Date(newer.ts).toLocaleString() + '</div>' +
+      rows;
+  }
+
+  function scanMap(scan) {
+    var m = {};
+    if (scan.checks.length === 1 && scan.checks[0] === 'fullScan') {
+      var checks = scan.payload && scan.payload.checks;
+      if (checks) Object.keys(checks).forEach(function(k){ m[k] = checks[k]; });
+      else m.fullScan = scan.payload;
+    } else {
+      scan.checks.forEach(function(func, i) { m[func] = scan.payload[i]; });
+    }
+    return m;
+  }
+
+  function findScan(scans, id) { for (var i=0;i<scans.length;i++) if (scans[i].id===id) return scans[i]; return null; }
+})();
+
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className = 'gs-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.classList.add('show'); }, 10);
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ t.remove(); }, 300); }, 2200);
+}
+

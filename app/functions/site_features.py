@@ -1,6 +1,3 @@
-"""Site Features check: detects PWA / HTML5 / modern web platform features
-by parsing the HTML of the landing page. Free, no external API."""
-
 import re
 import httpx
 from urllib.parse import urljoin
